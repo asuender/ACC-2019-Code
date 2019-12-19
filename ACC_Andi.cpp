@@ -45,5 +45,6 @@ N M(N n) {
 int main() {
     time_t tstart = time(NULL);
     std::cout << M(500) << std::endl;
-    time_t
+    time_t tend = time(NULL);
+    std::cout << tend-tstart << " seconds." << std::endl;
 }
