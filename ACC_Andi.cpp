@@ -47,4 +47,5 @@ int main() {
     std::cout << M(500) << std::endl;
     time_t tend = time(NULL);
     std::cout << tend-tstart << " second(s)." << std::endl;
+    return 0;
 }
