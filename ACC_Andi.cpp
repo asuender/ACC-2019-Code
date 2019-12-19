@@ -4,6 +4,12 @@
 #include <iostream>
 #include <algorithm>
 #include <time.h>
+#include <thread>
+#include <future>
+
+//some global variables
+unsigned long j;
+unsigned long i;
 
 template<typename T>
 T min(std::vector<T> v) {
@@ -27,24 +33,43 @@ unsigned long A(I i, J j) {
     return min(list);
 }
 
-template<typename N>
-N M(N n) {
+template<typename N, typename A>
+std::vector<unsigned long> M(N n, A area) {
+    n = n-area;
+    if (n == 1000) {
+        ::j=501;
+        ::i=501;
+    }
+    else {
+        ::j=1;
+        ::i=1;
+    }
+
     std::vector<N> results = {};
-    for (auto j=1; j<=n; j++) {
-        for (auto i=1; i<=j; i++) {
+    for (::j; ::j<=n; ::j++) {
+        for (::i; ::i<=::j; ::i++) {
             results.push_back(A(i, j));
         }
     }
-    unsigned long sum = 0;
+    return results;
+    /*unsigned long sum = 0;
     for (auto it = results.begin(); it != results.end(); ++it) {
         sum += *it;
     }
-    return sum;
+    return sum;*/
+}
+
+template<typename T>
+void Thread(T num) {
+    auto th1 = std::async(M, num, 1000);
+    //unsigned long th1v = th1.get();
+    auto th2 = std::async(M, num, 500);
+    //nsigned long th2v = th2.get();
 }
 
 int main() {
     time_t tstart = time(NULL);
-    std::cout << M(500) << std::endl;
+    Thread(1000);
     time_t tend = time(NULL);
     std::cout << tend-tstart << " second(s)." << std::endl;
     return 0;
