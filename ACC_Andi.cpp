@@ -48,24 +48,27 @@ std::tuple<long long,std::map<long, long long>> A(I i, J j,CS cs) {
     return std::make_tuple(smallest,cs);
 }
 
-template<typename S, typename E>
-std::vector<long long> M(S start, E end) {
+template<typename E, typename P>
+std::vector<long long> M(E end, P procnum) {
     std::vector<long long> results {};
     std::map<long, long long> cs {};	//short for cheatsheet
 	long long result;
-    for (E j=start+1; j<=end; j++) {
+	std::string prstr="\033["+std::to_string(procnum*5)+"C";
+	std::cout << prstr+"0%\r";
+    for (E j=procnum; j<=end; j+=4) {
         for (E i=1; i<=j; i++) {
         	tie(result,cs)=A(i, j, cs);
             results.push_back(result); 
         }
+        std::cout << prstr+std::to_string(100*(j)/(end))+"%\r";
     }
-
+	std::cout << prstr+"100%\r";
     return results;
 }
 
-void f(std::promise<std::vector<long long>> P, long long start, long end) {
+void f(std::promise<std::vector<long long>> P, long end, int procnum) {
     try {
-        std::vector<long long> result = M(start, end);
+        std::vector<long long> result = M(end, procnum);
         P.set_value(result);
     }
     catch (...) {
@@ -75,24 +78,22 @@ void f(std::promise<std::vector<long long>> P, long long start, long end) {
 
 template<typename T>
 long long Thread(T num) {
-	long num1=1.5*num/2;
-	long num2=3*num/4;
-	long num3=7*num/8;
+	std::cout << "Procs:\n\r";
     std::promise<std::vector<long long>> P1;
     std::future<std::vector<long long>> F1 = P1.get_future();
-    std::thread T1 {f, std::move(P1), 0, num1};
+    std::thread T1 {f, std::move(P1), num,1};
 
     std::promise<std::vector<long long>> P2;
     std::future<std::vector<long long>> F2 = P2.get_future();
-    std::thread T2 {f, std::move(P2), num1, num2};
+    std::thread T2 {f, std::move(P2), num,2};
 
     std::promise<std::vector<long long>> P3;
     std::future<std::vector<long long>> F3 = P3.get_future();
-    std::thread T3 {f, std::move(P3), num2, num3};
+    std::thread T3 {f, std::move(P3), num,3};
 
     std::promise<std::vector<long long>> P4;
     std::future<std::vector<long long>> F4 = P4.get_future();
-    std::thread T4 {f, std::move(P4), num3, num};
+    std::thread T4 {f, std::move(P4), num,4};
 
     T1.join(); T2.join(); T3.join(); T4.join();
     
@@ -121,6 +122,6 @@ int main() {
 
     time_t tend = time(NULL);
 
-    std::cout << "M(" << num << ")= " << sum << "; " << tend-tstart << " second(s)." << std::endl;
+    std::cout << "\nM(" << num << ")= " << sum << "; " << tend-tstart << " second(s)." << std::endl;
     return 0;
 }
