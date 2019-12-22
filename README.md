@@ -1,6 +1,24 @@
 # ACC-2019-Code
+
 Code [C++] for Level 3 of the Advent Coding Contest, written in C++.
 
-newest version: 22-12-2019;
+## HOW-TOs
 
-To build this program on Linux, you need to add '''-pthread''' as an command line argument.
+#### Executing:
+
+- There are precompiled binaries that you can just run. If you can't find a matching executable, please go to the section about compiling.
+
+#### Compiling:
+
+- You can use the C++ compiler of your choice, however official support only covers GCC (GNU C  Compiler).
+- You compile the program using the command `gcc ./ACC_Andi.cpp -o ACC_Andi -pthread`. This will create a file named 'ACC_Andi' which is the desired executable.
+
+#### Bug reporting:
+
+- If you find any bug that isn't already known, please open a new bug report in the bug tracker. We will fix it as soon as possible.
+
+## CHANGELOG
+
+#### 2019.12.22-11.00
+
+- first working build
