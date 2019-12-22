@@ -4,6 +4,8 @@
 #include <thread>
 #include <exception>
 #include <vector>
+#include <map>
+#include <tuple>
 #include <iostream>
 #include <algorithm>
 #include <time.h>
@@ -19,28 +21,42 @@ long long min(std::vector<T> v) {
 
 template<typename N>
 long long S(N n) {
-    long long result=290797;
-    for(int i=n;i>0;i--){
-    	result*=result;
-    	result%=50515093;
-    }
+	long long result;
+	result=290797;
+	for(int i=n;i>0;i--){
+		result*=result;
+		result%=50515093;
+	}
     return result;
 }  
 
-template<typename I, typename J>
-long long A(I i, J j) {
-    std::vector<long long> list {};
-    for (J x=i; x<=j; x++) list.push_back(S(x));
-    return min(list);
+template<typename I, typename J, typename CS>
+std::tuple<long long,std::map<long, long long>> A(I i, J j,CS cs) {
+    long long res;
+    long long smallest=9223372036854775807;
+    for (J x=i; x<=j; x++){
+    	if(cs.count(x)==1){
+    		res=cs[x];
+    	}else{
+	    	res=S(x);
+	    	cs.emplace(x,res);
+	    }
+    	if(res<smallest){
+    		smallest=res;
+    	}
+    }
+    return std::make_tuple(smallest,cs);
 }
 
 template<typename S, typename E>
 std::vector<long long> M(S start, E end) {
     std::vector<long long> results {};
-
+    std::map<long, long long> cs {};	//short for cheatsheet
+	long long result;
     for (E j=start+1; j<=end; j++) {
         for (E i=1; i<=j; i++) {
-            results.push_back(A(i, j)); 
+        	tie(result,cs)=A(i, j, cs);
+            results.push_back(result); 
         }
     }
 
@@ -94,7 +110,7 @@ long long Thread(T num) {
 } 
 
 int main() {
-    auto num = 20;
+    auto num = 500;
 
     time_t tstart = time(NULL);
 
