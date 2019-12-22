@@ -75,21 +75,24 @@ void f(std::promise<std::vector<long long>> P, long long start, long end) {
 
 template<typename T>
 long long Thread(T num) {
+	long num1=1.5*num/2;
+	long num2=3*num/4;
+	long num3=7*num/8;
     std::promise<std::vector<long long>> P1;
     std::future<std::vector<long long>> F1 = P1.get_future();
-    std::thread T1 {f, std::move(P1), 0, num*(0.25)};
+    std::thread T1 {f, std::move(P1), 0, num1};
 
     std::promise<std::vector<long long>> P2;
     std::future<std::vector<long long>> F2 = P2.get_future();
-    std::thread T2 {f, std::move(P2), num*(0.25), num/2};
+    std::thread T2 {f, std::move(P2), num1, num2};
 
     std::promise<std::vector<long long>> P3;
     std::future<std::vector<long long>> F3 = P3.get_future();
-    std::thread T3 {f, std::move(P3), num/2, num*(0.75)};
+    std::thread T3 {f, std::move(P3), num2, num3};
 
     std::promise<std::vector<long long>> P4;
     std::future<std::vector<long long>> F4 = P4.get_future();
-    std::thread T4 {f, std::move(P4), num*0.75, num};
+    std::thread T4 {f, std::move(P4), num3, num};
 
     T1.join(); T2.join(); T3.join(); T4.join();
     
