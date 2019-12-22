@@ -1,4 +1,4 @@
-//C++
+//!/bin/g++
 
 #include <vector>
 #include <iostream>
