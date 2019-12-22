@@ -57,11 +57,8 @@ void f(std::promise<std::vector<long long>> P, long long start, long end) {
     }
 }
 
-int main() {
-    auto num = 20;
-
-    time_t tstart = time(NULL);
-
+template<typename T>
+long long Thread(T num) {
     std::promise<std::vector<long long>> P1;
     std::future<std::vector<long long>> F1 = P1.get_future();
     std::thread T1 {f, std::move(P1), 0, num*(0.25)};
@@ -92,6 +89,16 @@ int main() {
 
     long long sum = 0;
     for (size_t i=0; i<r.size(); i++) sum+=r[i];
+
+    return sum;
+} 
+
+int main() {
+    auto num = 20;
+
+    time_t tstart = time(NULL);
+
+    auto sum = Thread(num); 
 
     time_t tend = time(NULL);
 
