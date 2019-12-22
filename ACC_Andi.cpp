@@ -1,10 +1,12 @@
 //!/bin/g++
 
+#include <future>
+#include <thread>
+#include <exception>
 #include <vector>
 #include <iostream>
 #include <algorithm>
 #include <time.h>
-#include <future>
 #include <numeric>
 
 
@@ -43,26 +45,52 @@ std::vector<long long> M(S start, E end) {
     return results;
 }
 
-template<typename T>
-long long Thread(T num) {
-    auto a1 = std::async(M<T, T>, 0, num/2);
-    auto a2 = std::async(M<T, T>, num/2, num);
-
-    std::vector<long long> r = a1.get();
-    std::vector<long long> r2 = a2.get();
-    r.insert(r.end(), r2.begin(), r2.end());
-
-
-    long long sum = 0;
-    for (auto i=0; i<r.size(); i++) sum+=r[i];
-    return sum;
+void f(std::promise<std::vector<long long>> P, long long start, long end) {
+    try {
+        std::vector<long long> result = M(start, end);
+        P.set_value(result);
+    }
+    catch (...) {
+        P.set_exception(std::current_exception());
+    }
 }
 
 int main() {
-    auto num = 200;
+    auto num = 20;
 
     time_t tstart = time(NULL);
-    auto sum = Thread(num);
+
+    std::promise<std::vector<long long>> P1;
+    std::future<std::vector<long long>> F1 = P1.get_future();
+    std::thread T1 {f, std::move(P1), 0, num*(0.25)};
+
+    std::promise<std::vector<long long>> P2;
+    std::future<std::vector<long long>> F2 = P2.get_future();
+    std::thread T2 {f, std::move(P2), num*(0.25), num/2};
+
+    std::promise<std::vector<long long>> P3;
+    std::future<std::vector<long long>> F3 = P3.get_future();
+    std::thread T3 {f, std::move(P3), num/2, num*(0.75)};
+
+    std::promise<std::vector<long long>> P4;
+    std::future<std::vector<long long>> F4 = P4.get_future();
+    std::thread T4 {f, std::move(P4), num*0.75, num};
+
+    T1.join(); T2.join(); T3.join(); T4.join();
+    
+    std::vector<long long> r = F1.get();
+    std::vector<long long> r2 = F2.get();
+    std::vector<long long> r3 = F3.get();
+    std::vector<long long> r4 = F4.get();
+
+    r.insert(r.end(), r2.begin(), r2.end());
+    r3.insert(r3.end(), r4.begin(), r4.end());
+
+    r.insert(r.end(), r3.begin(), r3.end());
+
+    long long sum = 0;
+    for (size_t i=0; i<r.size(); i++) sum+=r[i];
+
     time_t tend = time(NULL);
 
     std::cout << "M(" << num << ")= " << sum << "; " << tend-tstart << " second(s)." << std::endl;
