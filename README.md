@@ -10,8 +10,8 @@ Code [C++] for Level 3 of the Advent Coding Contest, written in C++.
 
 #### Compiling:
 
-- You can use the C++ compiler of your choice, however official support only covers GCC (GNU C  Compiler).
-- You compile the program using the command `gcc ./ACC_Andi.cpp -o ACC_Andi -pthread`. This will create a file named 'ACC_Andi' which is the desired executable.
+- You can use the C++ compiler of your choice, however official support only covers the g++ command from GCC (GNU Compiler Collection).
+- You compile the program using the command `g++ ./ACC_Andi.cpp -o ACC_Andi -pthread`. This will create a file named 'ACC_Andi' which is the desired executable.
 
 #### Bug reporting:
 
