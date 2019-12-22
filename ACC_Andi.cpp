@@ -19,10 +19,12 @@ long long min(std::vector<T> v) {
 
 template<typename N>
 long long S(N n) {
-    if (n==0)
-        return 290797;
-    long long s = S(n-1);
-    return (s*s) % 50515093;
+    long long result=290797;
+    for(int i=n;i>0;i--){
+    	result*=result;
+    	result%=50515093;
+    }
+    return result;
 }  
 
 template<typename I, typename J>
