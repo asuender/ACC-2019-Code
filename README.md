@@ -16,8 +16,13 @@ Code [C++] for Level 3 of the Advent Coding Contest, written in C++.
 #### Bug reporting:
 
 - If you find any bug that isn't already known, please open a new bug report in the bug tracker. We will fix it as soon as possible.
+- We realised that numbers higher than 100 won't be calculated; maybe 'cause there's an overflow. When you find that error in the code, please create an issue and we will fix it as soon as possible.
 
 ## CHANGELOG
+
+#### 2019.12.22-14.00
+ - added two more threads
+ - removed ```std::async```; calculate is managed by ```std::future``` and ```std::promise``` 
 
 #### 2019.12.22-11.00
 
