@@ -2,6 +2,7 @@
 
 #include <future>
 #include <thread>
+#include <mutex>
 #include <exception>
 #include <vector>
 #include <map>
@@ -10,6 +11,10 @@
 #include <algorithm>
 #include <time.h>
 #include <numeric>
+
+std::mutex mtx; // we need this...   ---+
+                //                      |
+std::vector<long long> values; //    <--+ ... to avoid data races
 
 
 template<typename T>
@@ -30,12 +35,14 @@ long long S(N n) {
     return result;
 }  
 
-template<typename I, typename J, typename CS>
-std::tuple<long long,std::map<long, long long>> A(I i, J j,CS cs) {
-    long long res;
-    long long smallest=9223372036854775807;
-    for (J x=i; x<=j; x++){
-    	if(cs.count(x)==1){
+template<typename I, typename J>
+long long A(I i, J j) {
+    std::vector<long long> list{};
+    //long long res;
+    //long long smallest=9223372036854775807;
+    for (J x=i; x<=j; x++)
+        list.push_back(S(x));
+    	/*if(cs.count(x)==1){
     		res=cs[x];
     	}else{
 	    	res=S(x);
@@ -44,21 +51,30 @@ std::tuple<long long,std::map<long, long long>> A(I i, J j,CS cs) {
     	if(res<smallest){
     		smallest=res;
     	}
-    }
-    return std::make_tuple(smallest,cs);
+    }*/
+    return min(list);
+    //return std::make_tuple(smallest,cs);
 }
 
 template<typename E, typename P>
 std::vector<long long> M(E end, P procnum) {
-    std::vector<long long> results {};
-    std::map<long, long long> cs {};	//short for cheatsheet
-	long long result;
+    std::vector<long long> results;
+    //std::map<long, long long> cs {};	//short for cheatsheet
+	long long tmp;
 	std::string prstr="\033["+std::to_string(procnum*5)+"C";
 	std::cout << prstr+"0%\r";
     for (E j=procnum; j<=end; j+=4) {
         for (E i=1; i<=j; i++) {
-        	tie(result,cs)=A(i, j, cs);
-            results.push_back(result); 
+        	//while (mtx.try_lock()==false)
+                //continue;
+            if (values.at(i) != 0)
+                results.push_back(values.at(i));
+            else {
+                tmp = A(i, j);
+                results.push_back(tmp);
+                values[i] = tmp;
+            }
+            //mtx.unlock();
         }
         std::cout << prstr+std::to_string(100*(j)/(end))+"%\r";
     }
@@ -114,7 +130,8 @@ long long Thread(T num) {
 } 
 
 int main() {
-    auto num = 500;
+    auto num = 10;
+    values.reserve(num);
 
     time_t tstart = time(NULL);
 
