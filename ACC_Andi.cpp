@@ -12,9 +12,6 @@
 #include <time.h>
 #include <numeric>
 
-std::mutex mtx; // we need this...   ---+
-                //                      |
-std::vector<long long> values; //    <--+ ... to avoid data races
 
 
 template<typename T>
@@ -37,7 +34,7 @@ long long S(N n) {
 
 template<typename I, typename J>
 long long A(I i, J j) {
-    std::vector<long long> list{};
+    std::vector<long long> list;
     //long long res;
     //long long smallest=9223372036854775807;
     for (J x=i; x<=j; x++)
@@ -59,22 +56,22 @@ long long A(I i, J j) {
 template<typename E, typename P>
 std::vector<long long> M(E end, P procnum) {
     std::vector<long long> results;
+    std::vector<long long> values(end);
     //std::map<long, long long> cs {};	//short for cheatsheet
 	long long tmp;
 	std::string prstr="\033["+std::to_string(procnum*5)+"C";
 	std::cout << prstr+"0%\r";
     for (E j=procnum; j<=end; j+=4) {
         for (E i=1; i<=j; i++) {
-        	//while (mtx.try_lock()==false)
-                //continue;
-            if (values.at(i) != 0)
-                results.push_back(values.at(i));
+            if (values.at(i-1) != 0) {
+                results.push_back(values.at(i-1));
+            }
             else {
                 tmp = A(i, j);
                 results.push_back(tmp);
-                values[i] = tmp;
+                values.at(i-1) = tmp;
             }
-            //mtx.unlock();
+            
         }
         std::cout << prstr+std::to_string(100*(j)/(end))+"%\r";
     }
@@ -131,8 +128,6 @@ long long Thread(T num) {
 
 int main() {
     auto num = 10;
-    values.reserve(num);
-
     time_t tstart = time(NULL);
 
     auto sum = Thread(num); 
