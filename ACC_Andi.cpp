@@ -5,8 +5,6 @@
 #include <mutex>
 #include <exception>
 #include <vector>
-#include <map>
-#include <tuple>
 #include <iostream>
 #include <algorithm>
 #include <time.h>
@@ -14,12 +12,6 @@
 
 std::vector<long long> cache;
 std::mutex mtx;
-
-template<typename T>
-long long min(std::vector<T> v) {
-    long long min_e = (v.size() == 1) ? v.at(0) : *std::min_element(v.begin(), v.end());
-    return min_e;
-}
 
 
 template<typename N>
@@ -38,23 +30,21 @@ long long A(I i, J j) {
 	std::vector<long long> list;
 	long long res;
 	long long smallest=9223372036854775807;
+
 	for (J x=i; x<=j; x++){
 		mtx.lock();
 		while(cache.size()<x+1){
 			cache.push_back(0);
 		}
 		mtx.unlock();
-		if (cache.at(x) != 0) {
-             res=cache.at(x);
-        }else{
+		if (cache.at(x) != 0) res=cache.at(x);
+        else {
 			res=S(x);
 			mtx.lock();
 			cache.at(x)=res;
 			mtx.unlock();
 		}
-		if(res<smallest){
-			smallest=res;
-		}
+		if(res<smallest) smallest=res;
 	}
 	return smallest;
 }
@@ -122,7 +112,7 @@ long long Thread(T num) {
 } 
 
 int main() {
-    auto num = 200;
+    auto num = 10000;
     time_t tstart = time(NULL);
 	
     auto sum = Thread(num); 
