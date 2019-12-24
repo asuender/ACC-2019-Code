@@ -11,6 +11,7 @@
 #include <algorithm>
 #include <time.h>
 #include <numeric>
+#include <utility>
 
 std::vector<long long> cache;
 std::mutex mtx;
@@ -59,12 +60,12 @@ long long A(I i, J j) {
 	return smallest;
 }
 
-template<typename E, typename P>
-std::vector<long long> M(E end, P procnum) {
+template<typename E, typename P, typename C>
+std::vector<long long> M(E end, P procnum, C cores) {
     std::vector<long long> results;
 	std::string prstr="\033["+std::to_string(procnum*5)+"C";
 	std::cout << prstr+"0%\r";
-    for (E j=procnum; j<=end; j+=4) {
+    for (E j=procnum; j<=end; j+=cores) {
         for (E i=1; i<=j; i++) {
             results.push_back(A(i, j));
         }
@@ -74,9 +75,9 @@ std::vector<long long> M(E end, P procnum) {
     return results;
 }
 
-void f(std::promise<std::vector<long long>> P, long end, int procnum) {
+void f(std::promise<std::vector<long long>> P, long end, int procnum, unsigned cores) {
     try {
-        std::vector<long long> result = M(end, procnum);
+        std::vector<long long> result = M(end, procnum,cores);
         P.set_value(result);
     }
     catch (...) {
@@ -86,43 +87,35 @@ void f(std::promise<std::vector<long long>> P, long end, int procnum) {
 
 template<typename T>
 long long Thread(T num) {
+	std::vector<std::pair<std::future<std::vector<long long>>,std::thread>> threads;
+	unsigned cores=std::thread::hardware_concurrency();
+	std::cout << "Using " << cores << " Cores\n\r";
+	std::vector<long long> results;
 	std::cout << "Procs:\n\r";
-    std::promise<std::vector<long long>> P1;
-    std::future<std::vector<long long>> F1 = P1.get_future();
-    std::thread T1 {f, std::move(P1), num,1};
-
-    std::promise<std::vector<long long>> P2;
-    std::future<std::vector<long long>> F2 = P2.get_future();
-    std::thread T2 {f, std::move(P2), num,2};
-
-    std::promise<std::vector<long long>> P3;
-    std::future<std::vector<long long>> F3 = P3.get_future();
-    std::thread T3 {f, std::move(P3), num,3};
-
-    std::promise<std::vector<long long>> P4;
-    std::future<std::vector<long long>> F4 = P4.get_future();
-    std::thread T4 {f, std::move(P4), num,4};
-
-    T1.join(); T2.join(); T3.join(); T4.join();
+	for(unsigned i=0;i<cores;i++){
+		std::promise<std::vector<long long>> Px;
+	    std::future<std::vector<long long>> Fx = Px.get_future();
+	    std::thread Tx {f, std::move(Px), num,i+1,cores};
+	    threads.push_back(std::make_pair(std::move(Fx),std::move(Tx)));
+	}
+	
+	for(unsigned i=0;i<cores;i++){
+		threads[i].second.join();
+	}
     
-    std::vector<long long> r = F1.get();
-    std::vector<long long> r2 = F2.get();
-    std::vector<long long> r3 = F3.get();
-    std::vector<long long> r4 = F4.get();
-
-    r.insert(r.end(), r2.begin(), r2.end());
-    r3.insert(r3.end(), r4.begin(), r4.end());
-
-    r.insert(r.end(), r3.begin(), r3.end());
-
+    for(unsigned i=0;i<cores;i++){
+    	std::vector<long long> ress=threads[i].first.get();
+    	results.insert(results.end(),ress.begin(),ress.end());
+    }
+    
     long long sum = 0;
-    for (size_t i=0; i<r.size(); i++) sum+=r[i];
+    for (size_t i=0; i<results.size(); i++) sum+=results[i];
 
     return sum;
 } 
 
 int main() {
-    auto num = 200;
+    auto num = 1000;
     time_t tstart = time(NULL);
 	
     auto sum = Thread(num); 
