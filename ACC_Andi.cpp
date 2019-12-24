@@ -12,7 +12,8 @@
 #include <time.h>
 #include <numeric>
 
-
+std::vector<long long> cache;
+std::mutex mtx;
 
 template<typename T>
 long long min(std::vector<T> v) {
@@ -34,44 +35,38 @@ long long S(N n) {
 
 template<typename I, typename J>
 long long A(I i, J j) {
-    std::vector<long long> list;
-    //long long res;
-    //long long smallest=9223372036854775807;
-    for (J x=i; x<=j; x++)
-        list.push_back(S(x));
-    	/*if(cs.count(x)==1){
-    		res=cs[x];
-    	}else{
-	    	res=S(x);
-	    	cs.emplace(x,res);
-	    }
-    	if(res<smallest){
-    		smallest=res;
-    	}
-    }*/
-    return min(list);
-    //return std::make_tuple(smallest,cs);
+	std::vector<long long> list;
+	long long res;
+	long long smallest=9223372036854775807;
+	for (J x=i; x<=j; x++){
+		mtx.lock();
+		while(cache.size()<x+1){
+			cache.push_back(0);
+		}
+		mtx.unlock();
+		if (cache.at(x) != 0) {
+             res=cache.at(x);
+        }else{
+			res=S(x);
+			mtx.lock();
+			cache.at(x)=res;
+			mtx.unlock();
+		}
+		if(res<smallest){
+			smallest=res;
+		}
+	}
+	return smallest;
 }
 
 template<typename E, typename P>
 std::vector<long long> M(E end, P procnum) {
     std::vector<long long> results;
-    std::vector<long long> values(end);
-    //std::map<long, long long> cs {};	//short for cheatsheet
-	long long tmp;
 	std::string prstr="\033["+std::to_string(procnum*5)+"C";
 	std::cout << prstr+"0%\r";
     for (E j=procnum; j<=end; j+=4) {
         for (E i=1; i<=j; i++) {
-            if (values.at(i-1) != 0) {
-                results.push_back(values.at(i-1));
-            }
-            else {
-                tmp = A(i, j);
-                results.push_back(tmp);
-                values.at(i-1) = tmp;
-            }
-            
+            results.push_back(A(i, j));
         }
         std::cout << prstr+std::to_string(100*(j)/(end))+"%\r";
     }
@@ -127,9 +122,9 @@ long long Thread(T num) {
 } 
 
 int main() {
-    auto num = 10;
+    auto num = 200;
     time_t tstart = time(NULL);
-
+	
     auto sum = Thread(num); 
 
     time_t tend = time(NULL);
