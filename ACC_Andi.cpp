@@ -14,6 +14,7 @@ std::vector<long long> cache;
 std::mutex mtx;
 
 
+
 template<typename N>
 long long S(N n) {
 	long long result;
