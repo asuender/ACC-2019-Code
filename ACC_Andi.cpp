@@ -79,7 +79,7 @@ void Calculation<Type>::calc(std::promise<long long> P, long end, int procnum, u
 		prntmtx.lock();
 		std::cout << prstr << "100%\r";
 		prntmtx.unlock();
-		long long result;
+		long long result=0;
 		for (size_t i=0; i<results.size(); i++) result+=results[i];
         P.set_value(result);
     }
@@ -91,27 +91,25 @@ void Calculation<Type>::calc(std::promise<long long> P, long end, int procnum, u
 template<typename Type>
 vector<long long> Calculation<Type>::calculate() {
     vector<long long> tmp;
+    long long result;
     std::cout << "Using " << this->cores << " Cores\n\r";
     for (auto num : this->values) {
-        std::vector<std::pair<std::future<long long>,std::thread>> threads;
-        long long result;
-        std::cout << "Procs:\n\r";
+    	std::vector<std::pair<std::future<long long>,std::thread>> threads;
+        result=0;
         for(unsigned i=0;i<cores;i++) {
             std::promise<long long> Px;
             std::future<long long> Fx = Px.get_future();
             std::thread Tx {&Calculation::calc, this, std::move(Px), num,i+1,cores};
             threads.push_back(std::make_pair(std::move(Fx),std::move(Tx)));
         }
-
+        
         for(unsigned i=0;i<cores;i++) {
             threads[i].second.join();
-        }
-
-        for(unsigned i=0;i<cores;i++) {
             result+=threads[i].first.get();
         }
-
+        
         tmp.push_back(result);
+        std::cout << std::endl;
     }
     return tmp;
 }
@@ -121,11 +119,12 @@ unsigned Calculation<Type>::cores = std::thread::hardware_concurrency();
 
 int main() {
     time_t tstart = time(NULL);
-    Calculation<int> c {500};
+    Calculation<int> c {200,500,10};
     vector<long long> v = c.calculate();
     time_t tend = time(NULL);
-
-    std::cout << "\n" << v.at(0) << std::endl;
+	for(size_t i=0; i<v.size(); i++){
+		std::cout << "M(" << c.values.at(i) << ")=" << v.at(i) << std::endl;
+	}
     std::cout << tend-tstart << " second(s)." << std::endl;
     return 0;
 }
