@@ -14,7 +14,27 @@
 std::vector<long long> cache;
 std::mutex mtx;
 
-void f(std::promise<long long> P, long end, int procnum, unsigned cores) {
+using std::vector; using std::tuple; using std::cout; using std::endl; using std::string;
+using std::initializer_list;
+
+template<typename Type>
+struct Calculation {
+    using calc_t = long long;
+
+    vector<Type> values;
+    static unsigned cores;
+
+    Calculation() {};
+    Calculation(initializer_list<Type> init) {
+        values.insert(values.begin(), init.begin(), init.end());
+    }
+
+    void calc(std::promise<long long> P, long end, int procnum, unsigned cores);
+    vector<calc_t> calculate();
+};
+
+template<typename Type>
+void Calculation<Type>::calc(std::promise<long long> P, long end, int procnum, unsigned cores) {
     try {
         long long result;
 		std::string prstr="\033["+std::to_string(procnum*5)+"C";
@@ -55,39 +75,44 @@ void f(std::promise<long long> P, long end, int procnum, unsigned cores) {
     }
 }
 
-template<typename T>
-long long Thread(T num) {
-	std::vector<std::pair<std::future<long long>,std::thread>> threads;
-	unsigned cores=std::thread::hardware_concurrency();
-	std::cout << "Using " << cores << " Cores\n\r";
-	long long result;
-	std::cout << "Procs:\n\r";
-	for(unsigned i=0;i<cores;i++){
-		std::promise<long long> Px;
-	    std::future<long long> Fx = Px.get_future();
-	    std::thread Tx {f, std::move(Px), num,i+1,cores};
-	    threads.push_back(std::make_pair(std::move(Fx),std::move(Tx)));
-	}
-	
-	for(unsigned i=0;i<cores;i++){
-		threads[i].second.join();
-	}
-    
-    for(unsigned i=0;i<cores;i++){
-    	result+=threads[i].first.get();
-    }
+template<typename Type>
+vector<long long> Calculation<Type>::calculate() {
+    vector<long long> tmp;
+    std::cout << "Using " << this->cores << " Cores\n\r";
+    for (auto num : this->values) {
+        std::vector<std::pair<std::future<long long>,std::thread>> threads;
+        long long result;
+        std::cout << "Procs:\n\r";
+        for(unsigned i=0;i<cores;i++) {
+            std::promise<long long> Px;
+            std::future<long long> Fx = Px.get_future();
+            std::thread Tx {&Calculation::calc, this, std::move(Px), num,i+1,cores};
+            threads.push_back(std::make_pair(std::move(Fx),std::move(Tx)));
+        }
 
-    return result;
-} 
+        for(unsigned i=0;i<cores;i++) {
+            threads[i].second.join();
+        }
+
+        for(unsigned i=0;i<cores;i++) {
+            result+=threads[i].first.get();
+        }
+
+        tmp.push_back(result);
+    }
+    return tmp;
+}
+
+template<typename Type>
+unsigned Calculation<Type>::cores = std::thread::hardware_concurrency();
 
 int main() {
-    auto num = 1000;
     time_t tstart = time(NULL);
-	
-    auto sum = Thread(num); 
-
+    Calculation<int> c {10};
+    vector<long long> v = c.calculate();
     time_t tend = time(NULL);
 
-    std::cout << "\nM(" << num << ")= " << sum << "; " << tend-tstart << " second(s)." << std::endl;
+    std::cout << v.at(0) << std::endl;
+    std::cout << tend-tstart << " second(s)." << std::endl;
     return 0;
 }
