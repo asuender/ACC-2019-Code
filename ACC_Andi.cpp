@@ -12,7 +12,8 @@
 #include <utility>
 
 std::vector<long long> cache;
-std::mutex mtx;
+std::mutex cachemtx;	//mutex for the cache vector
+std::mutex prntmtx;		//mutex for printing stuff
 
 using std::vector; using std::tuple; using std::cout; using std::endl; using std::string;
 using std::initializer_list;
@@ -38,7 +39,9 @@ void Calculation<Type>::calc(std::promise<long long> P, long end, int procnum, u
     try {
         std::vector<long long> results;
 		std::string prstr="\033["+std::to_string(procnum*5)+"C";
-		std::cout << prstr+"0%\r";
+		prntmtx.lock();
+		std::cout << prstr << "0%\r";
+		prntmtx.unlock();
 		long long smallest;
 		long long res;
 		uint8_t percentage=0;
@@ -46,11 +49,11 @@ void Calculation<Type>::calc(std::promise<long long> P, long end, int procnum, u
 		    for (int i=1; i<=j; i++) {
 		    	smallest=9223372036854775807;
 		        for (int x=i; x<=j; x++){
-					mtx.lock();
+					cachemtx.lock();
 					while(cache.size()<x+1){
 						cache.push_back(0);
 					}
-					mtx.unlock();
+					cachemtx.unlock();
 					if (cache.at(x) != 0) res=cache.at(x);
 					else {
 						res=290797;
@@ -58,9 +61,9 @@ void Calculation<Type>::calc(std::promise<long long> P, long end, int procnum, u
 							res*=res;
 							res%=50515093;
 						}
-						mtx.lock();
+						cachemtx.lock();
 						cache.at(x)=res;
-						mtx.unlock();
+						cachemtx.unlock();
 					}
 					if(res<smallest) smallest=res;
 				}
@@ -68,10 +71,14 @@ void Calculation<Type>::calc(std::promise<long long> P, long end, int procnum, u
 		    }
 		    if(100*(j)/(end)>percentage){
 		    	percentage++;
-			    std::cout << prstr+std::to_string(percentage)+"%\r" << std::flush;
+		    	prntmtx.lock();
+			    std::cout << prstr << std::to_string(percentage) << "%\r" << std::flush;
+			    prntmtx.unlock();
 			}
 		}
-		std::cout << prstr+"100%\r";
+		prntmtx.lock();
+		std::cout << prstr << "100%\r";
+		prntmtx.unlock();
 		long long result;
 		for (size_t i=0; i<results.size(); i++) result+=results[i];
         P.set_value(result);
