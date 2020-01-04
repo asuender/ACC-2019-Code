@@ -36,12 +36,12 @@ struct Calculation {
 template<typename Type>
 void Calculation<Type>::calc(std::promise<long long> P, long end, int procnum, unsigned cores) {
     try {
-        long long result;
         std::vector<long long> results;
 		std::string prstr="\033["+std::to_string(procnum*5)+"C";
 		std::cout << prstr+"0%\r";
 		long long smallest;
 		long long res;
+		uint8_t percentage=0;
 		for (int j=procnum; j<=end; j+=cores) {
 		    for (int i=1; i<=j; i++) {
 		    	smallest=9223372036854775807;
@@ -66,9 +66,13 @@ void Calculation<Type>::calc(std::promise<long long> P, long end, int procnum, u
 				}
 				results.push_back(smallest);
 		    }
-		    std::cout << prstr+std::to_string(100*(j)/(end))+"%\r";
+		    if(100*(j)/(end)>percentage){
+		    	percentage++;
+			    std::cout << prstr+std::to_string(percentage)+"%\r" << std::flush;
+			}
 		}
 		std::cout << prstr+"100%\r";
+		long long result;
 		for (size_t i=0; i<results.size(); i++) result+=results[i];
         P.set_value(result);
     }
