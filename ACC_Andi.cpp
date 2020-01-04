@@ -11,7 +11,7 @@
 #include <numeric>
 #include <utility>
 
-std::vector<long long> cache;
+std::vector<unsigned long long> cache;
 std::mutex cachemtx;	//mutex for the cache vector
 std::mutex prntmtx;		//mutex for printing stuff
 
@@ -20,7 +20,7 @@ using std::initializer_list;
 
 template<typename Type>
 struct Calculation {
-    using calc_t = long long;
+    using calc_t = unsigned long long;
 
     vector<Type> values;
     static unsigned cores;
@@ -30,25 +30,25 @@ struct Calculation {
         values.insert(values.begin(), init.begin(), init.end());
     }
 
-    void calc(std::promise<long long> P, long end, int procnum, unsigned cores);
+    void calc(std::promise<unsigned long long> P, long end, unsigned int procnum, unsigned cores);
     vector<calc_t> calculate();
 };
 
 template<typename Type>
-void Calculation<Type>::calc(std::promise<long long> P, long end, int procnum, unsigned cores) {
+void Calculation<Type>::calc(std::promise<unsigned long long> P, long end, unsigned int procnum, unsigned cores) {
     try {
-        std::vector<long long> results;
+        std::vector<unsigned long long> results;
 		std::string prstr="\033["+std::to_string(procnum*5)+"C";
 		prntmtx.lock();
 		std::cout << prstr << "0%\r";
 		prntmtx.unlock();
-		long long smallest;
-		long long res;
+		unsigned long long smallest;
+		unsigned long long res;
 		uint8_t percentage=0;
-		for (int j=procnum; j<=end; j+=cores) {
-		    for (int i=1; i<=j; i++) {
-		    	smallest=9223372036854775807;
-		        for (int x=i; x<=j; x++){
+		for (unsigned int j=procnum; j<=end; j+=cores) {
+		    for (unsigned int i=1; i<=j; i++) {
+		    	smallest=-1;
+		        for (unsigned int x=i; x<=j; x++){
 					cachemtx.lock();
 					while(cache.size()<x+1){
 						cache.push_back(0);
@@ -57,7 +57,7 @@ void Calculation<Type>::calc(std::promise<long long> P, long end, int procnum, u
 					if (cache.at(x) != 0) res=cache.at(x);
 					else {
 						res=290797;
-						for(int i=x;i>0;i--){
+						for(unsigned int i=x;i>0;i--){
 							res*=res;
 							res%=50515093;
 						}
@@ -79,7 +79,7 @@ void Calculation<Type>::calc(std::promise<long long> P, long end, int procnum, u
 		prntmtx.lock();
 		std::cout << prstr << "100%\r";
 		prntmtx.unlock();
-		long long result=0;
+		unsigned long long result=0;
 		for (size_t i=0; i<results.size(); i++) result+=results[i];
         P.set_value(result);
     }
@@ -89,16 +89,16 @@ void Calculation<Type>::calc(std::promise<long long> P, long end, int procnum, u
 }
 
 template<typename Type>
-vector<long long> Calculation<Type>::calculate() {
-    vector<long long> tmp;
-    long long result;
+vector<unsigned long long> Calculation<Type>::calculate() {
+    vector<unsigned long long> tmp;
+    unsigned long long result;
     std::cout << "Using " << this->cores << " Cores\n\r";
     for (auto num : this->values) {
-    	std::vector<std::pair<std::future<long long>,std::thread>> threads;
+    	std::vector<std::pair<std::future<unsigned long long>,std::thread>> threads;
         result=0;
         for(unsigned i=0;i<cores;i++) {
-            std::promise<long long> Px;
-            std::future<long long> Fx = Px.get_future();
+            std::promise<unsigned long long> Px;
+            std::future<unsigned long long> Fx = Px.get_future();
             std::thread Tx {&Calculation::calc, this, std::move(Px), num,i+1,cores};
             threads.push_back(std::make_pair(std::move(Fx),std::move(Tx)));
         }
@@ -120,7 +120,7 @@ unsigned Calculation<Type>::cores = std::thread::hardware_concurrency();
 int main() {
     time_t tstart = time(NULL);
     Calculation<int> c {200,500,10};
-    vector<long long> v = c.calculate();
+    vector<unsigned long long> v = c.calculate();
     time_t tend = time(NULL);
 	for(size_t i=0; i<v.size(); i++){
 		std::cout << "M(" << c.values.at(i) << ")=" << v.at(i) << std::endl;
