@@ -37,6 +37,7 @@ template<typename Type>
 void Calculation<Type>::calc(std::promise<long long> P, long end, int procnum, unsigned cores) {
     try {
         long long result;
+        std::vector<long long> results;
 		std::string prstr="\033["+std::to_string(procnum*5)+"C";
 		std::cout << prstr+"0%\r";
 		long long smallest;
@@ -63,11 +64,12 @@ void Calculation<Type>::calc(std::promise<long long> P, long end, int procnum, u
 					}
 					if(res<smallest) smallest=res;
 				}
-				result+=smallest;
+				results.push_back(smallest);
 		    }
 		    std::cout << prstr+std::to_string(100*(j)/(end))+"%\r";
 		}
 		std::cout << prstr+"100%\r";
+		for (size_t i=0; i<results.size(); i++) result+=results[i];
         P.set_value(result);
     }
     catch (...) {
