@@ -108,11 +108,11 @@ unsigned Calculation<Type>::cores = std::thread::hardware_concurrency();
 
 int main() {
     time_t tstart = time(NULL);
-    Calculation<int> c {10};
+    Calculation<int> c {500};
     vector<long long> v = c.calculate();
     time_t tend = time(NULL);
 
-    std::cout << v.at(0) << std::endl;
+    std::cout << "\n" << v.at(0) << std::endl;
     std::cout << tend-tstart << " second(s)." << std::endl;
     return 0;
 }
