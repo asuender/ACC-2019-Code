@@ -72,7 +72,7 @@ void Calculation<Type>::calc(std::promise<unsigned long long> P, long end, unsig
 		    if(100*(j)/(end)>percentage){
 		    	percentage++;
 		    	prntmtx.lock();
-			    std::cout << prstr << std::to_string(percentage) << "%\r" << std::flush;
+			    cout << prstr << std::to_string(percentage) << "%\r" << std::flush;
 			    prntmtx.unlock();
 			}
 		}
