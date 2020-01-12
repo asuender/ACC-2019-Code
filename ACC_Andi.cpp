@@ -24,10 +24,12 @@ struct Calculation {
 
     vector<Type> values;
     static unsigned cores;
+	int valuec;     
 
     Calculation() {};
     Calculation(initializer_list<Type> init) {
         values.insert(values.begin(), init.begin(), init.end());
+		valuec = init.size();
     }
 
     void calc(std::promise<unsigned long long> P, long end, unsigned int procnum, unsigned cores);
@@ -77,7 +79,7 @@ void Calculation<Type>::calc(std::promise<unsigned long long> P, long end, unsig
 			}
 		}
 		prntmtx.lock();
-		std::cout << prstr << "100%\r";
+		std::cout << prstr << "\u001b[32m100%\u001b[0m\r";
 		prntmtx.unlock();
 		unsigned long long result=0;
 		for (size_t i=0; i<results.size(); i++) result+=results[i];
@@ -92,7 +94,8 @@ template<typename Type>
 vector<unsigned long long> Calculation<Type>::calculate() {
     vector<unsigned long long> tmp;
     unsigned long long result;
-    std::cout << "Using " << this->cores << " Cores\n\r";
+	std::cout << "Calculating " << this->valuec << " number(s)\n";
+    std::cout << "Using \u001b[31m" << this->cores << "\u001b[0m Cores\n\r";
     for (auto num : this->values) {
     	std::vector<std::pair<std::future<unsigned long long>,std::thread>> threads;
         result=0;
@@ -123,8 +126,8 @@ int main() {
     vector<unsigned long long> v = c.calculate();
     time_t tend = time(NULL);
 	for(size_t i=0; i<v.size(); i++){
-		std::cout << "M(" << c.values.at(i) << ")=" << v.at(i) << std::endl;
+		std::cout << "M(" << c.values.at(i) << ") = " << v.at(i) << std::endl;
 	}
-    std::cout << tend-tstart << " second(s)." << std::endl;
+    std::cout << "\033[1;3m" << tend-tstart << "\033[0m second(s)." << std::endl;
     return 0;
 }
