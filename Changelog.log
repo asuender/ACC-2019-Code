@@ -6,7 +6,7 @@
 First code publish.
 
 -- commit 9a20716 --
-Added duration output. Solved with two 'time_t' variables from '<time.h>' header (C Standard Library). Will be changed.
+Duration of the calculation will be printed at the end of the run. Solved with two 'time_t' variables from '<time.h>' header (C Standard Library). Will be changed.
 
 <=== Dec 22, 2019 ===>
 
@@ -18,20 +18,82 @@ First experimental version with threads. 'std::async' is used to calculate the n
 Some optimizations and important changes.
 
 -- commit 1158d77 --
-first use of 'std::future' and 'std::promise'. In order to manage that with 'std::thread', 'f()' function was added. Static 4 parallel tasks.
+First use of 'std::future' and 'std::promise'. In order to manage that with 'std::thread', 'f()' function was added. Static 4 parallel tasks.
 
 -- commit 24f8896 --
 optimization through avoidance of recursvive calls in function 'S()'. See History Task on GitHub.
 
 
 -- commit 56a27f9 --
-some code moves.
+Some code moves.
 
 -- commit 0a98314 --
-Really important commit. Instead of recalculating a lot of numbers, results will be cached. Decreases the duration of the calculation.
+Really important commit. Instead of recalculating a lot of numbers, results will be cached. Decreases the duration.
 
 -- commit b251916 --
 Calculation areas are set in 'long' variables before, not in the thread calls.
+
+-- commit 4520317 --
+Some optimizations in 'Thread()' to improve the process balancing.
+
+<=== Dec 24, 2019 ==>
+
+-- commit a371d9e & 8448fe2 --
+Not working build. First try in usage of 'std::mutex'.
+
+-- commit c9c2aef --
+Working build. Secure access to global 'cache' variable with 'std::mutex'.
+
+-- commit f413bdb --
+Code formatting.
+
+-- commit 30eaf71 --
+Number of threads is now flexible and depends on the PC. First use of 'std::hardware_concurrency' to set the threads count.
+
+<=== Dec 28, 2019 ===>
+
+
+-- commit bc8b5b4 --
+Joined functions 'A()', 'M()', 'S()' and 'f()' into one.
+
+-- commit 9812e23 --
+First step of making this code to a module: moved all public functions to struct 'Calculation<Type>'. To calculate one or more numbers, create an object of the struct above initialize it with a list. All numbers will be handled in 'Calculation<Type>::calculate(...)'.
+
+-- commit 137cb85 --
+Set number back to 500 and fixed output.
+
+-- commit 7618edf --
+Fixed incomprehensible calculation error. It appears that this error existed since some commits before. Now it should work.
+
+-- commit 9e02f6c --
+Added 'std::flush' to empty the puffer. In addition, the percentage output has been optimized in order to avoid multiple prints with the same percentage.
+
+-- commit 433e4ab --
+Added mutex to lock and unlock the print function.
+
+-- commit 234c317 --
+Support for calculating multiple numbers has been fixed and some output changes.
+
+-- commit 91039ca --
+Equip smost data types with key word 'unsigned' to move the value range. Through that, the biggest number of long long which can be saved is much higher.
+
+-- commit 4c0563c --
+Formatted console output to make the experience with this project more powerfull ;-)
+
+-- commit b22321f --
+Birth of this changelog!
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
