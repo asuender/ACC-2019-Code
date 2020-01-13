@@ -9,7 +9,7 @@ Code [C++] for Level 3 of the Advent Coding Contest, written in C++.
 - There are precompiled binaries that you can just run. If you can't find a matching executable, please go to the section about compiling.
 
 ##### Run (Linux):
-`./ACC-Andi` make sure you are in the right directory.
+`./ACC_Andi` make sure you are in the right directory.
 
 If you are using a different OS, it is required to recompile the source code to run it.
 
