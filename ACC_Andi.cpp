@@ -16,7 +16,7 @@ std::mutex cachemtx;	//mutex for the cache vector
 std::mutex prntmtx;		//mutex for printing stuff
 
 using std::vector; using std::tuple; using std::cout; using std::endl; using std::string;
-using std::initializer_list;
+using std::initializer_list; using std::future; using std::promise; using std::thread;
 
 template<typename Type>
 struct Calculation {
@@ -39,6 +39,8 @@ struct Calculation {
 template<typename Type>
 void Calculation<Type>::calc(std::promise<unsigned long long> P, long end, unsigned int procnum, unsigned cores) {
     try {
+		time_t dstart = time(NULL);
+
         std::vector<unsigned long long> results;
 		std::string prstr="\033["+std::to_string(procnum*5)+"C";
 		prntmtx.lock();
@@ -76,18 +78,22 @@ void Calculation<Type>::calc(std::promise<unsigned long long> P, long end, unsig
 			if (percentage < 99 && percentage > 63) cout << "\033[33m";
 
 		    if(100*(j)/(end)>percentage){
+				time_t dend = time(NULL);
 		    	percentage++;
 		    	prntmtx.lock();
 			    cout << prstr << std::to_string(percentage) << "%\r" << std::flush;
+				cout << "\033[m";
+				cout << "\033["+std::to_string(cores*5)+"C\t   " << dend-dstart << " sec.\r";
 			    prntmtx.unlock();
 			}
-			cout << "\033[m";
 		}
 		prntmtx.lock();
-		std::cout << prstr << "\u001b[32m100%\u001b[0m\r";
+		std::cout << prstr << "\033[32m100%\033[0m\r";
 		prntmtx.unlock();
 		unsigned long long result=0;
-		for (size_t i=0; i<results.size(); i++) result+=results[i];
+		for (size_t i=0; i<results.size(); i++) {
+			result+=results[i];
+		}
         P.set_value(result);
     }
     catch (...) {
@@ -100,9 +106,9 @@ vector<unsigned long long> Calculation<Type>::calculate() {
     vector<unsigned long long> tmp;
     unsigned long long result;
 	std::cout << "Calculating " << this->valuec << " number(s):\n";
-    std::cout << "Using \u001b[33m" << this->cores << "\u001b[0m Cores\n\r";
+    std::cout << "Using \033[33m" << this->cores << "\033[0m Cores\n\r";
     for (auto num : this->values) {
-    	std::vector<std::pair<std::future<unsigned long long>,std::thread>> threads;
+    	vector<std::pair<future<unsigned long long>,thread>> threads;
         result=0;
         for(unsigned i=0;i<cores;i++) {
             std::promise<unsigned long long> Px;
@@ -123,7 +129,7 @@ vector<unsigned long long> Calculation<Type>::calculate() {
 }
 
 template<typename Type>
-unsigned Calculation<Type>::cores = std::thread::hardware_concurrency();
+unsigned Calculation<Type>::cores = (std::thread::hardware_concurrency()==0) ? 1 : std::thread::hardware_concurrency();
 
 int main() {
     time_t tstart = time(NULL);
@@ -133,6 +139,6 @@ int main() {
 	for(size_t i=0; i<v.size(); i++){
 		std::cout << "M(" << c.values.at(i) << ") = " << v.at(i) << std::endl;
 	}
-    std::cout << "\033[1;3m" << tend-tstart << "\033[0m second(s)." << std::endl;
+    //std::cout << "\033[1;3m" << tend-tstart << "\033[0m second(s)." << std::endl;
     return 0;
 }
