@@ -105,9 +105,10 @@ template<typename Type>
 vector<unsigned long long> Calculation<Type>::calculate() {
     vector<unsigned long long> tmp;
     unsigned long long result;
-	std::cout << "Calculating " << this->valuec << " number(s):\n";
-    std::cout << "Using \033[33m" << this->cores << "\033[0m Cores\n\r";
-    for (auto num : this->values) {
+	std::cout << "Calculating " << this->valuec << " number(s): \033[3m";
+	for (auto num : this->values) cout << num << " ";
+    std::cout << "\033[m\nUsing \033[33m" << this->cores << "\033[0m Cores\n\r";
+    for (auto &num : this->values) {
     	vector<std::pair<future<unsigned long long>,thread>> threads;
         result=0;
         for(unsigned i=0;i<cores;i++) {
