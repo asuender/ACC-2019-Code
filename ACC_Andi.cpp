@@ -71,12 +71,17 @@ void Calculation<Type>::calc(std::promise<unsigned long long> P, long end, unsig
 				}
 				results.push_back(smallest);
 		    }
+			if (percentage < 33) cout << "\033[31m";
+			if (percentage < 63 && percentage > 33) cout << "\033[91m";
+			if (percentage < 99 && percentage > 63) cout << "\033[33m";
+
 		    if(100*(j)/(end)>percentage){
 		    	percentage++;
 		    	prntmtx.lock();
 			    cout << prstr << std::to_string(percentage) << "%\r" << std::flush;
 			    prntmtx.unlock();
 			}
+			cout << "\033[m";
 		}
 		prntmtx.lock();
 		std::cout << prstr << "\u001b[32m100%\u001b[0m\r";
@@ -94,8 +99,8 @@ template<typename Type>
 vector<unsigned long long> Calculation<Type>::calculate() {
     vector<unsigned long long> tmp;
     unsigned long long result;
-	std::cout << "Calculating " << this->valuec << " number(s)\n";
-    std::cout << "Using \u001b[31m" << this->cores << "\u001b[0m Cores\n\r";
+	std::cout << "Calculating " << this->valuec << " number(s):\n";
+    std::cout << "Using \u001b[33m" << this->cores << "\u001b[0m Cores\n\r";
     for (auto num : this->values) {
     	std::vector<std::pair<std::future<unsigned long long>,std::thread>> threads;
         result=0;

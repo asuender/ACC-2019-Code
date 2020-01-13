@@ -1,0 +1,58 @@
+----- Changelog -----
+
+<=== Dec 19, 2019 ===>
+
+-- commit 6d1b8a7 --
+First code publish.
+
+-- commit 9a20716 --
+Added duration output. Solved with two 'time_t' variables from '<time.h>' header (C Standard Library). Will be changed.
+
+<=== Dec 22, 2019 ===>
+
+-- commit 05f87b8 --
+First experimental version with threads. 'std::async' is used to calculate the numbers in two different tasks.
+'Thread()' handles that.
+
+-- commit 388efde --
+Some optimizations and important changes.
+
+-- commit 1158d77 --
+first use of 'std::future' and 'std::promise'. In order to manage that with 'std::thread', 'f()' function was added. Static 4 parallel tasks.
+
+-- commit 24f8896 --
+optimization through avoidance of recursvive calls in function 'S()'. See History Task on GitHub.
+
+
+-- commit 56a27f9 --
+some code moves.
+
+-- commit 0a98314 --
+Really important commit. Instead of recalculating a lot of numbers, results will be cached. Decreases the duration of the calculation.
+
+-- commit b251916 --
+Calculation areas are set in 'long' variables before, not in the thread calls.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
