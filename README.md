@@ -16,7 +16,6 @@ If you are using a different OS, it is required to recompile the source code to 
 
 | (Windows) It could be that the source code won't be able to compile since Winodws is a different OS. Maybe the reason is `std::mutex`. If you have a solution for that error, just create an issue. |
 | --- |
-</aside>
 
 #### Description of included files
 - `ACC_Andi`: executable file. See chapter above.
