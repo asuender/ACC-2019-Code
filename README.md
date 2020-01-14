@@ -21,7 +21,7 @@ If you are using a different OS, it is required to recompile the source code to 
 #### Description of included files
 - `ACC_Andi`: executable file. See chapter above.
 - `ACC_Andi.cpp`: Source code.
-- `ACC_Andi.cpp`: object file. only needed for compiling process
+- `ACC_Andi.o`: object file. only needed for compiling process
 - `Changelog.log`: as the name it says
 - `README.md`: this readme
 - `doc/` contains the documentation
