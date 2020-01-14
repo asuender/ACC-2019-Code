@@ -15,7 +15,7 @@
 std::vector<unsigned long long> cache;
 std::vector<std::string> statusprint(5);
 std::mutex cachemtx;	//mutex for the cache vector
-std::mutex prntmtx;		//mutex for printing stuff
+//std::mutex prntmtx;		//mutex for printing stuff
 std::mutex vmutex; 		//mutex for printing vector
 
 using std::vector; using std::tuple; using std::cout; using std::endl; using std::string;
@@ -48,13 +48,11 @@ struct Calculation {
 
 
 void print(int cores) {
-	prntmtx.lock();
 	vmutex.lock();
 	for (size_t t=1; t<statusprint.size(); t++) {
 		cout << "\r\033["+std::to_string(t*5)+"C" << statusprint[t-1] << "%\r";
 	}
-	cout << "\033["+std::to_string(cores*5)+"C\t\t" << statusprint[4] << " sec.\r" << std::flush;
-	prntmtx.unlock();
+	cout << "\033["+std::to_string(cores*5)+"C\t\t" << statusprint[4] << std::flush;
 	vmutex.unlock();
 }
 
@@ -66,7 +64,13 @@ void count(TimeObject &t, int cores) {
 
 	while (t._end == false) {
 		vmutex.lock();
-		statusprint[4] = std::to_string(time(NULL) - t._times);
+		auto timediff = time(NULL) - t._times;
+		if (timediff > 60) {
+			statusprint[4] = std::to_string(timediff/60) + " min. "+ std::to_string(timediff%60) + " sec.";
+		}
+		else {
+			statusprint[4] = std::to_string(time(NULL) - t._times) + " sec.";
+		}
 		vmutex.unlock();
 		std::this_thread::sleep_for(std::chrono::milliseconds(100));
 		print(cores);
@@ -80,9 +84,7 @@ void Calculation<Type>::calc(std::promise<unsigned long long> P, long end, unsig
 
         std::vector<unsigned long long> results;
 		std::string prstr="\033["+std::to_string(procnum*5)+"C";
-		prntmtx.lock();
-		std::cout << prstr << "0%\r";
-		prntmtx.unlock();
+		statusprint[procnum-1] = "0";
 		unsigned long long smallest;
 		unsigned long long res;
 		uint8_t percentage=0;
@@ -127,13 +129,9 @@ void Calculation<Type>::calc(std::promise<unsigned long long> P, long end, unsig
 
 		    if(100*(j)/(end)>percentage){
 		    	percentage++;
-		    	/*prntmtx.lock();
-			    cout << prstr << std::to_string(percentage) << "%\r" << std::flush;
-			    prntmtx.unlock();*/
 				vmutex.lock();
 				statusprint[procnum-1] = std::to_string(percentage);
 				vmutex.unlock();
-				//print(cores);
 			}
 		}
 		vmutex.lock();
@@ -188,10 +186,8 @@ template<typename Type>
 unsigned Calculation<Type>::cores = (std::thread::hardware_concurrency()==0) ? 1 : std::thread::hardware_concurrency();
 
 int main() {
-    time_t tstart = time(NULL);
-    Calculation<int> c {1000,500,10};
+    Calculation<int> c {10, 200, 500, 1000, 10000};
     vector<unsigned long long> v = c.calculate();
-    time_t tend = time(NULL);
 	for(size_t i=0; i<v.size(); i++){
 		std::cout << "M(" << c.values.at(i) << ") = " << v.at(i) << std::endl;
 	}

@@ -1,6 +1,6 @@
 # ACC-2019-Code
 
-Code [C++] for Level 3 of the Advent Coding Contest, written in C++.
+Code for Level 3 of the Advent Coding Contest, written in C++.
 
 ## HOW-TOs
 
@@ -29,12 +29,21 @@ If you are using a different OS, it is required to recompile the source code to 
 #### Compiling:
 
 - You can use the C++ compiler of your choice, however official support only covers the g++ command from GCC (GNU Compiler Collection).
-- You compile the program using the command `g++ ./ACC_Andi.cpp -o ACC_Andi -pthread`. This will create a file named 'ACC_Andi' which is the desired executable.
+- You compile the program using the command `g++ ./ACC_Andi.cpp -o ACC_Andi -pthread`. This will create a file named `ACC_Andi` which is the desired executable.
 
 #### Bug reporting:
 
 - If you find any bug that isn't already known, please open a new bug report in the bug tracker. We will fix it as soon as possible.
 - We realised that numbers higher than 100 won't be calculated; the reason could be an overflow. When you find that error in the code, please create an issue and we will fix it as soon as possible.
+
+## FEATURES
+These following things are possible/implemented since the last update of this project:
+
+- Multiple Numbers Handling
+- Calculating the number/s in more than one task possible
+- Duration output
+- Caching of the results makes the code pretty fast
+- Formatted progress printing of all threads
 
 ## CHANGELOG
 
@@ -42,7 +51,8 @@ See `Changelog.log`
 
 ## SOLUTIONS
 
-| 10        | 200         | 500          | 1000         | 10000         | 2000000000 |
-| --------- | ----------- | ------------ | ------------ | ------------- | ---------- |
-| 432256955 | 61956210911 | 149585554326 | 322833621931 | 3264567774119 | ?          |
+| ---------------------------------- | 10        | 200         | 500          | 1000         | 10000         | 2000000000 |
+| ---------------------------------- | --------- | ----------- | ------------ | ------------ | ------------- | ---------- |
+| ---------------------------------- | 432256955 | 61956210911 | 149585554326 | 322833621931 | 3264567774119 | ?          |
+| Duration on a Lenovo ThinkPad T430 |  < 1 sec. |  < 1 sec.   |   3 sec.     |    26 sec.   | ?             | ?          |
 
