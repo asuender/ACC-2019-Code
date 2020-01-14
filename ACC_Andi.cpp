@@ -12,8 +12,10 @@
 #include <utility>
 
 std::vector<unsigned long long> cache;
+std::vector<std::string> statusprint(5);
 std::mutex cachemtx;	//mutex for the cache vector
 std::mutex prntmtx;		//mutex for printing stuff
+std::mutex vmutex; 		//mutex for printing vector
 
 using std::vector; using std::tuple; using std::cout; using std::endl; using std::string;
 using std::initializer_list; using std::future; using std::promise; using std::thread;
@@ -35,6 +37,18 @@ struct Calculation {
     void calc(std::promise<unsigned long long> P, long end, unsigned int procnum, unsigned cores);
     vector<calc_t> calculate();
 };
+
+
+void print(int cores) {
+	prntmtx.lock();
+	vmutex.lock();
+	for (size_t t=1; t<statusprint.size(); t++) {
+		cout << "\r\033["+std::to_string(t*5)+"C" << statusprint[t-1] << "%\r" << std::flush;
+	}
+	cout << "\033["+std::to_string(cores*5)+"C\t\t" << statusprint[4] << " sec.\r" << std::flush;
+	prntmtx.unlock();
+	vmutex.unlock();
+}
 
 template<typename Type>
 void Calculation<Type>::calc(std::promise<unsigned long long> P, long end, unsigned int procnum, unsigned cores) {
@@ -70,26 +84,39 @@ void Calculation<Type>::calc(std::promise<unsigned long long> P, long end, unsig
 						cachemtx.unlock();
 					}
 					if(res<smallest) smallest=res;
+
+					
 				}
 				results.push_back(smallest);
 		    }
-			if (percentage < 33) cout << "\033[31m";
+			/*if (percentage < 33) cout << "\033[31m";
 			if (percentage < 63 && percentage > 33) cout << "\033[91m";
-			if (percentage < 99 && percentage > 63) cout << "\033[33m";
+			if (percentage < 99 && percentage > 63) cout << "\033[33m";*/
+
+			/*prntmtx.lock();
+			cout << "\033["+std::to_string(cores*5)+"C\t   " << dend-dstart << " sec.\r";
+			prntmtx.unlock();*/
+
+			time_t dend = time(NULL);
+			vmutex.lock();
+			statusprint[4] = std::to_string(dend-dstart);
+			vmutex.unlock();
 
 		    if(100*(j)/(end)>percentage){
-				time_t dend = time(NULL);
 		    	percentage++;
-		    	prntmtx.lock();
+		    	/*prntmtx.lock();
 			    cout << prstr << std::to_string(percentage) << "%\r" << std::flush;
-				cout << "\033[m";
-				cout << "\033["+std::to_string(cores*5)+"C\t   " << dend-dstart << " sec.\r";
-			    prntmtx.unlock();
+			    prntmtx.unlock();*/
+				vmutex.lock();
+				statusprint[procnum-1] = std::to_string(percentage);
+				vmutex.unlock();
+				print(cores);
 			}
 		}
-		prntmtx.lock();
-		std::cout << prstr << "\033[32m100%\033[0m\r";
-		prntmtx.unlock();
+		vmutex.lock();
+		statusprint[procnum-1] = "100";
+		vmutex.unlock();
+		print(cores);
 		unsigned long long result=0;
 		for (size_t i=0; i<results.size(); i++) {
 			result+=results[i];
